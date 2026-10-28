@@ -1,0 +1,4 @@
+@label a
+@if stayed -> ending else ending
+@label ending
+@end Done [key done]

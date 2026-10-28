@@ -1,0 +1,4 @@
+# a plate written after the expression: the studio shows neither (tested 2026-10-16)
+#   Cast         Laila
+Laila (neutral) as "Front Desk": She looks up.
+@end Done

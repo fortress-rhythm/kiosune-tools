@@ -1,0 +1,12 @@
+# `not (...)`: a negated group. The extension once read `not (` as a call, recursed, and looped
+# forever on a shared regex.
+@set seenA = yes
+@set place = "x"
+@label start
+@if not (seenA and place != "") -> other
+: Both hold.
+@jump done
+@label other
+: One does not.
+@label done
+@end Done

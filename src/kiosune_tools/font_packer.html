@@ -1,0 +1,689 @@
+<title>Kiosune Font Packer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Silkscreen&display=swap">
+<style>
+/* Layout: a workbench. Source on the left, the import settings on the right, then the proof grid and a live text-box preview. Same faces and palette as the project's review pages. */
+:root{--ground:#ecebe7;--panel:#f7f6f3;--ink:#1d1c20;--muted:#64626b;--rule:#d6d4ce;
+--accent:#2f6450;--on-accent:#f7f6f3;--well:#1b1a20;--well-ink:#f0ece2;--good:#2f6450;--bad:#a3352b;
+--warn:#8a5a00;--display:Silkscreen,ui-monospace,monospace;
+--body:"Atkinson Hyperlegible",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#161519;--panel:#1f1e23;
+--ink:#ebe9e4;--muted:#9c99a3;--rule:#34323a;--accent:#8fc2a8;--on-accent:#161519;--well:#0d0c0f;
+--well-ink:#f0ece2;--good:#8fc2a8;--bad:#f08a7e;--warn:#e7b65c;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#161519;--panel:#1f1e23;--ink:#ebe9e4;--muted:#9c99a3;--rule:#34323a;
+--accent:#8fc2a8;--on-accent:#161519;--well:#0d0c0f;--well-ink:#f0ece2;--good:#8fc2a8;--bad:#f08a7e;
+--warn:#e7b65c;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--ground);color:var(--ink);font:15px/1.55 var(--body);margin:0}
+main{max-width:1080px;margin:0 auto;padding-block:24px 64px;
+padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+display:grid;gap:20px}
+h1{font:400 26px/1.2 var(--display);margin:0;letter-spacing:.02em;text-wrap:balance}
+h2{font-size:16px;margin:0;text-wrap:balance}
+p{margin:0;max-width:70ch}.muted{color:var(--muted)}
+.lede{display:grid;gap:6px}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:16px;display:grid;
+gap:12px;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:760px){.cols{grid-template-columns:minmax(0,1fr)}}
+label{font-size:13px;color:var(--muted);display:grid;gap:3px}
+input[type=number],input[type=text],select,textarea{font:13px var(--mono);color:var(--ink);
+background:var(--ground);border:1px solid var(--rule);border-radius:3px;padding:5px 7px}
+input[type=number]{width:5.5em}
+textarea{width:100%;resize:vertical;min-height:4.2em}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,.drop:focus-within{
+outline:2px solid var(--accent);outline-offset:2px}
+button{font:600 13px var(--body);color:var(--on-accent);background:var(--accent);border:0;border-radius:3px;
+padding:6px 12px;cursor:pointer}
+button.quiet{background:transparent;color:var(--accent);border:1px solid var(--rule)}
+button:disabled{opacity:.5;cursor:default}
+.drop{border:1.5px dashed var(--rule);border-radius:6px;padding:14px;display:grid;gap:8px;
+justify-items:start;transition:border-color .15s}
+.drop.over{border-color:var(--accent)}
+.drop input{font:13px var(--body);max-width:100%}
+.src{font:13px var(--mono);color:var(--muted);overflow-wrap:anywhere}
+dl.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:0;align-items:baseline}
+dl.kv dt{font-size:13px;color:var(--muted)}
+dl.kv dd{margin:0;font:600 15px var(--mono);font-variant-numeric:tabular-nums;min-width:0}
+.chars{font:13px/1.5 var(--mono);overflow-wrap:anywhere;font-weight:400}
+.well{background:var(--well);border-radius:4px;padding:10px;overflow-x:auto}
+canvas.px,img.px{image-rendering:pixelated;display:block}
+.status{font-size:13.5px}.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.proofwrap{overflow-x:auto;max-height:520px;overflow-y:auto;border:1px solid var(--rule);border-radius:4px}
+.legend{font-size:12.5px;color:var(--muted)}
+.chip{font:12px var(--mono);padding:1px 7px;border-radius:3px;border:1px solid var(--rule)}
+details summary{cursor:pointer;color:var(--accent)}
+ol.steps{margin:0;padding-left:20px;display:grid;gap:4px;max-width:70ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<main>
+  <header class="lede">
+    <h1>Kiosune font packer</h1>
+    <p>Turns a pixel font (<code>.ttf</code>/<code>.otf</code>) or a glyph-sheet PNG into what Kiosune Studio's
+      <b>Import a bitmap font</b> dialog asks for: a PNG grid of equal cells, the cell size, the baseline and the
+      characters in cell order. Nothing to count by hand.</p>
+  </header>
+
+  <div class="cols">
+    <section class="panel" aria-labelledby="h-src">
+      <h2 id="h-src">1 · Source</h2>
+      <div class="drop" id="drop">
+        <input type="file" id="file" accept=".ttf,.otf,.png,font/ttf,font/otf,image/png">
+        <span class="legend">Or drop a file here. A <b>sheet</b> is read cell by cell; a <b>font</b> is drawn at its own
+          pixel size.</span>
+      </div>
+      <p class="src" id="src">Example loaded: Cozette (MIT), as a 16-column ASCII sheet.</p>
+
+      <div id="sheetOpts" class="row" hidden>
+        <label for="cellW">cell width<input type="number" id="cellW" min="2" max="64"></label>
+        <label for="cellH">cell height<input type="number" id="cellH" min="2" max="64"></label>
+        <label for="order">character order<select id="order">
+          <option value="latin1">Latin-1: space … ~ then ¡ … ÿ</option>
+          <option value="ascii">ASCII: space … ~</option>
+          <option value="custom">custom (edit below)</option>
+        </select></label>
+      </div>
+      <div id="customWrap" hidden>
+        <label for="custom">characters in cell order, row by row (a space for an empty cell)</label>
+        <textarea id="custom" rows="4"></textarea>
+      </div>
+      <div id="askWrap" class="row" hidden>
+        <button type="button" class="quiet" id="ask">Ask Claude to read the sheet</button>
+        <button type="button" class="quiet" id="askStop" hidden>Stop</button>
+        <span class="legend" id="askNote">For sheets in an unusual order. Uses your Claude account.</span>
+      </div>
+
+      <div id="fontOpts" class="row" hidden>
+        <label for="size">pixel size<input type="number" id="size" min="4" max="64" step="0.25"></label>
+        <label for="set">characters<select id="set">
+          <option value="dot">ASCII + middle dot (·)</option>
+          <option value="ascii">ASCII (Kiosune's default 95)</option>
+          <option value="latin1">ASCII + Latin-1</option>
+        </select></label>
+        <span class="status" id="crisp"></span>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="h-out">
+      <h2 id="h-out">2 · Type these into the import dialog</h2>
+      <dl class="kv">
+        <dt>name</dt><dd><input type="text" id="name" value="Cozette"></dd>
+        <dt>cell</dt><dd id="oCell">–</dd>
+        <dt>baseline</dt><dd id="oBase">–</dd>
+        <dt>characters <span id="oCount"></span></dt><dd class="chars" id="oChars">–</dd>
+      </dl>
+      <div class="row">
+        <button type="button" id="copyChars">Copy characters</button>
+        <button type="button" id="savePng">Save PNG</button>
+        <button type="button" class="quiet" id="saveTxt">Save settings .txt</button>
+        <span class="status" id="saveNote" role="status"></span>
+      </div>
+      <div class="well"><img class="px" id="gridImg" alt="the packed glyph grid, white on transparent"></div>
+      <p class="legend">White on transparent, 16 cells a row. If saving is unavailable here, right-click the grid →
+        Save image as. Then in Kiosune: <b>Typography &amp; Textbox → import bitmap font… → choose PNG</b>, and copy the
+        three fields above.</p>
+      <p class="status" id="missing"></p>
+    </section>
+  </div>
+
+  <section class="panel" aria-labelledby="h-prev">
+    <h2 id="h-prev">3 · In the text box</h2>
+    <p class="muted">Kiosune's ADV box on the 480×270 canvas (298×64, the 62% dialogue width), drawn the way the
+      studio lays out a bitmap font: each glyph trimmed to its ink, 1px apart, lines a cell apart. Padding (8px sides,
+      6px top) is an assumption.</p>
+    <div class="row">
+      <label for="who">name plate<input type="text" id="who" value="Tobin"></label>
+      <label for="spacing">line spacing<input type="number" id="spacing" value="0" min="0" max="12"></label>
+      <span class="chip" id="fit"></span>
+    </div>
+    <label for="line">line<textarea id="line" rows="2">The lamp's dark. Ships are already turning for the point... quick, before the fog jumps the wall!</textarea></label>
+    <div class="well"><canvas class="px" id="box" width="314" height="96"></canvas></div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-proof">
+    <h2 id="h-proof">4 · Check the order</h2>
+    <p class="muted">Each cell with the character it was given. The orange line is the baseline. A sheet's order is a
+      convention, so a wrong guess shows up as a whole run of shifted labels.</p>
+    <div class="proofwrap"><canvas id="proof"></canvas></div>
+  </section>
+
+  <details class="panel">
+    <summary>How the measurements are made</summary>
+    <ol class="steps">
+      <li><b>Sheets:</b> ink is every opaque pixel, or on an opaque sheet every pixel unlike the most common
+        colour. The cell is the smallest width and height that divide the sheet and that no glyph straddles.</li>
+      <li><b>Baseline</b> is the number of pixel rows above the baseline: the bottom row most capitals and digits sit
+        on. Kiosune's default 8×12 cell uses 10.</li>
+      <li><b>Fonts:</b> the pixel size is the period of the glyph edges in a large render, checked against the sizes
+        that draw with no grey edge pixels. A glyph the font lacks (the browser would substitute another font) is
+        left out and listed.</li>
+      <li><b>Cell</b> is the widest glyph by the tallest ascent plus the deepest descent, so every glyph fits.</li>
+    </ol>
+  </details>
+</main>
+
+<script>
+(() => {
+"use strict";
+const EXAMPLE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABOCAYAAADfPhN+AAAEMklEQVR42u1d23alIAw9uPz/X3Ze5nRZhiQ7N0AneWmLCBhy3Qb7+RQ9i67ruu4/tfdJbdQ1aT5t/134eGgYZt2cUft1XVdrrVEbQ12j5m2ttXub5v6VdMzY6S9z7kz5/v699gRmZfDkE6UB14BQk6U1Tx7TJK1phiBAc0SboPumIAxCfY31urY9i/nnDJW7m5ve7PSqKF2PZEBvDkftmo0NXWuUCaK0Y/TA3O9v0IDR2AcntVopH/2kHqiX8plOWDMnZTqj+i/3AVx/rxZEMCJqA5ZHebNVO3LOqI38LzL0HZlfVFRUtCn9EypyidHILt6vceMgIeBoLC6cHV3TrmeVn/pZD+e8uIQKCT2tEIMm9PSsJ8Mha0JtNhGjYABKkiQJQ2EFpJ8HouDidEkokDkR7R5iQf0EVmaNcBRq8RGmo3/gDFMjmeERGsBt2K9rEmxsTXKs46EmD/mbw6Zm5AFIRnxaJEdrAkZMmuEUKa3SjqHVANUzeiXO2s/iPBGJkvp4fECG1pyUDeXw8X6C9pcibHfUOJQ/8mhTRIAwS/tfgScVFfOLioqKloFxUnSk7S/F5VIaT40/ir+lSKq/zo1D3Y/0p4rPRDAuox2peNDmGdq8AclL0HXe7x39jqwzrTSRAvKioo2sWFoTp6O5AZuIeTM9z+RROP5u7381G3NyEirV9HgzOw+03WfPEUy0VOR5NfHgJKDdaKvIIUjrsteIzHVkMZur+98+NJxYqXeOJkNNQG8GtKCYZl4tSHePPvoXTV4fo3XS1nmLioqKip5JBW8bGIbUQUn9OfhBnBip6/f2z8Sa0HZkPagkW9+hm0EuayWat8Iuej19m/WFvNfUTAXjspMmTaK3S1J4eO1ln4h5z0hJDOXeI1AJl5fZmZnxSWW2KGhFSf0OEsYVVe2SiR4eHGgmZsJJ9IyTllnjH6jJ0eBDWZJL4UkUHrWz7f9lglAgKRIsWwlOecG1JRv49szO+nEQzX2j/KMg0QEjtRB1QctFRdNsu9cXWGzmDN+E1P9ssQkzNiBqPVEfBczcgOPNTkQKm7fOA7h4WVtQhUC9/djUaUt0PdzpGPSLWMgXs6SPD5oLzlbCxZqzYNbaUM19yEsX6/OeK9R/5+RudqZ7rnzY3XzPCoE4shY2O7yNEojZ369TgXGcM0GPnY7GR7TBwpj+GbT3Rb7feF1lnPfTA1U2stBe78T89lSmFwJZVJSpaUjB1mP8yJMcnvc/d6TkAUWJeQAKHlGxONp/9MkbzUHnyPatMvIscE1S0wzwzgqoRZsgzWFxtwnatTQREbxeQyzZ7v25JU1TQRGezYhI3bO1fvRflyzr5grIkLG2dMJcsa3WvqMMyxBC+KS8BkRDbaF0NDQKdRyVJkrjWyvjlsboTwevsirfvHw5P0VkEIC+E54mGU/TgoioLJv+AHaLt8zEDRHdAAAAAElFTkSuQmCC";
+const ASCII = Array.from({length: 95}, (_, i) => String.fromCharCode(32 + i)).join("");
+const LATIN1 = ASCII + Array.from({length: 96}, (_, i) => String.fromCharCode(0xA0 + i)).join("");
+const SETS = {ascii: ASCII, dot: ASCII + "·", latin1: LATIN1};
+const COLS = 16, GAP = 1, PAD_X = 8, PAD_Y = 6, BOX_W = 298, BOX_H = 64;
+const $ = id => document.getElementById(id);
+
+let state = {kind: "sheet", mask: null, file: null, family: null, sheet: null};
+
+// ---- glyph sheets -------------------------------------------------------------------------
+
+/** {w, h, bits: Uint8Array} ink mask of an image. */
+function inkMask(img) {
+  const c = document.createElement("canvas");
+  c.width = img.naturalWidth || img.width; c.height = img.naturalHeight || img.height;
+  const x = c.getContext("2d");
+  x.drawImage(img, 0, 0);
+  const d = x.getImageData(0, 0, c.width, c.height).data;
+  const n = c.width * c.height, bits = new Uint8Array(n);
+  let transparent = false;
+  for (let i = 0; i < n; i++) if (d[i * 4 + 3] < 128) { transparent = true; break; }
+  if (transparent) {
+    for (let i = 0; i < n; i++) bits[i] = d[i * 4 + 3] >= 128 ? 1 : 0;
+  } else {
+    const count = new Map();
+    for (let i = 0; i < n; i++) {
+      const k = (d[i * 4] << 16) | (d[i * 4 + 1] << 8) | d[i * 4 + 2];
+      count.set(k, (count.get(k) || 0) + 1);
+    }
+    let bg = 0, best = -1;
+    for (const [k, v] of count) if (v > best) { best = v; bg = k; }
+    const br = bg >> 16, bgG = (bg >> 8) & 255, bb = bg & 255;
+    for (let i = 0; i < n; i++) {
+      const diff = Math.abs(d[i * 4] - br) + Math.abs(d[i * 4 + 1] - bgG) + Math.abs(d[i * 4 + 2] - bb);
+      bits[i] = diff > 96 ? 1 : 0;
+    }
+  }
+  return {w: c.width, h: c.height, bits};
+}
+
+/** The cell size, from how ink is spread along each axis: folded at the true cell width the
+ *  column (row) ink counts line up into a lumpy profile; at a wrong width they smear flat.
+ *  Multiples of the true width are as lumpy, so take the smallest nearly-lumpiest width. */
+function detectCell(m) {
+  const cols = new Float64Array(m.w), rows = new Float64Array(m.h);
+  for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++)
+    if (m.bits[y * m.w + x]) { cols[x]++; rows[y]++; }
+  const best = prof => {
+    const n = prof.length, cands = [];
+    for (let s = 3; s <= n / 2; s++) if (n % s === 0 && n / s <= 64) cands.push(s);
+    if (!cands.length) return n;
+    const lump = s => {
+      const f = new Float64Array(s);
+      prof.forEach((v, i) => { f[i % s] += v; });
+      const mean = f.reduce((a, b) => a + b, 0) / s;
+      if (!mean) return 0;
+      const sd = Math.sqrt(f.reduce((a, b) => a + (b - mean) ** 2, 0) / s);
+      return sd / mean;
+    };
+    const score = new Map(cands.map(s => [s, lump(s)]));
+    const top = Math.max(...score.values());
+    return cands.find(s => score.get(s) >= 0.75 * top);
+  };
+  return [best(cols), best(rows)];
+}
+
+/** The ink of a rectangle of a mask, trimmed: {w, h, bits, top, left} or null. */
+function trim(m, x0, y0, w, h) {
+  let l = w, t = h, r = -1, b = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++)
+    if (m.bits[(y0 + y) * m.w + x0 + x]) { l = Math.min(l, x); r = Math.max(r, x); t = Math.min(t, y); b = Math.max(b, y); }
+  if (r < 0) return null;
+  const gw = r - l + 1, gh = b - t + 1, bits = new Uint8Array(gw * gh);
+  for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++)
+    bits[y * gw + x] = m.bits[(y0 + t + y) * m.w + x0 + l + x];
+  return {w: gw, h: gh, bits, top: t, left: l};
+}
+
+const SPACE = () => ({w: 1, h: 1, bits: new Uint8Array(1), top: 0, space: true});
+
+function finish(glyphs) {
+  const ink = [...glyphs].filter(([c, g]) => !g.space);
+  if (!ink.length) return null;
+  const above = Math.max(...ink.map(([, g]) => -g.top));
+  const below = Math.max(0, ...ink.map(([, g]) => g.top + g.h));
+  const cellW = Math.max(...ink.map(([, g]) => g.w));
+  const widths = ink.filter(([c]) => /\p{L}/u.test(c)).map(([, g]) => g.w).sort((a, b) => a - b);
+  const space = widths.length ? Math.max(2, Math.floor(widths[widths.length >> 1] / 2) + 1) : 3;
+  if (!glyphs.has(" ")) glyphs = new Map([[" ", SPACE()], ...glyphs]);
+  return {glyphs, cellW, cellH: above + below, baseline: above, space};
+}
+
+function sheetFromMask(m, cw, ch, order) {
+  const cols = Math.floor(m.w / cw), rows = Math.floor(m.h / ch);
+  const cells = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push(trim(m, c * cw, r * ch, cw, ch));
+  while (cells.length && !cells[cells.length - 1]) cells.pop();
+  const chars = Array.from(order), glyphs = new Map();
+  cells.forEach((g, i) => {
+    const k = chars[i];
+    if (k === undefined) return;
+    if (k === " ") { glyphs.set(" ", SPACE()); return; }
+    if (g && !glyphs.has(k)) glyphs.set(k, g);
+  });
+  const bottoms = [...glyphs].filter(([k, g]) => !g.space && /[A-Z0-9]/.test(k)).map(([, g]) => g.top + g.h);
+  const base = bottoms.length ? mode(bottoms) : ch;
+  for (const g of glyphs.values()) if (!g.space) g.top -= base;
+  const sheet = finish(glyphs);
+  if (sheet) sheet.unassigned = Math.max(0, cells.length - chars.length);
+  return sheet;
+}
+
+function mode(a) {
+  const c = new Map(); let best = a[0], n = 0;
+  for (const v of a) { const k = (c.get(v) || 0) + 1; c.set(v, k); if (k > n) { n = k; best = v; } }
+  return best;
+}
+
+// ---- fonts --------------------------------------------------------------------------------
+
+const PROBE = Array.from("HAMBURGEFONSTIVhamburgefonstivwxyz0123456789");
+
+function fontCss(size, fam, fallback) { return `${size}px "${fam}"${fallback ? ", " + fallback : ""}`; }
+
+/** Draw each probe glyph in its own slot; returns the share of grey pixels among inked ones. */
+function greyRatio(fam, size) {
+  const slot = Math.ceil(size * 2) + 8, c = scratch(slot * PROBE.length, slot);
+  const x = c.getContext("2d", {willReadFrequently: true});
+  x.clearRect(0, 0, c.width, c.height);
+  x.font = fontCss(size, fam); x.textBaseline = "alphabetic"; x.fillStyle = "#fff";
+  PROBE.forEach((ch, i) => x.fillText(ch, i * slot + 4, Math.round(slot * 0.7)));
+  const d = x.getImageData(0, 0, c.width, c.height).data;
+  let ink = 0, grey = 0;
+  for (let i = 3; i < d.length; i += 4) { const a = d[i]; if (a) { ink++; if (a > 24 && a < 232) grey++; } }
+  return ink ? grey / ink : 1;
+}
+
+/** Size at which one design pixel is one screen pixel, from the edge period of a big render. */
+function gridSize(fam) {
+  const BIG = 240, c = scratch(BIG * 2, BIG * 2), x = c.getContext("2d", {willReadFrequently: true});
+  x.font = fontCss(BIG, fam); x.textBaseline = "alphabetic"; x.fillStyle = "#fff";
+  const xs = [], ys = [], ox = BIG / 2, oy = BIG * 1.5;
+  for (const ch of PROBE) {
+    x.clearRect(0, 0, c.width, c.height);
+    x.fillText(ch, ox, oy);
+    const d = x.getImageData(0, 0, c.width, c.height).data, W = c.width;
+    const on = (px, py) => d[(py * W + px) * 4 + 3] > 127;
+    for (let py = 0; py < c.height; py += 3) for (let px = 1; px < W; px++)
+      if (on(px, py) !== on(px - 1, py)) xs.push(px - ox);
+    for (let px = 0; px < W; px += 3) for (let py = 1; py < c.height; py++)
+      if (on(px, py) !== on(px, py - 1)) ys.push(oy - py);
+  }
+  if (!xs.length || !ys.length) return null;
+  const thin = a => a.length > 3000 ? a.filter((_, i) => i % Math.ceil(a.length / 3000) === 0) : a;
+  const ex = thin(xs), ey = thin(ys);
+  const share = (e, p) => {
+    let sx = 0, sy = 0;
+    for (const v of e) { const t = 2 * Math.PI * v / p; sx += Math.cos(t); sy += Math.sin(t); }
+    const phase = ((Math.atan2(sy, sx) / (2 * Math.PI)) * p + p) % p;
+    let ok = 0;
+    for (const v of e) { const r = Math.abs((((v - phase + p / 2) % p) + p) % p - p / 2); if (r <= 1) ok++; }
+    return ok / e.length;
+  };
+  let best = null;
+  for (let p = 4; p < 60; p += 0.02) if (Math.min(share(ex, p), share(ey, p)) >= 0.95) best = p;
+  return best ? BIG / best : null;
+}
+
+function nativeSize(fam) {
+  const n = gridSize(fam);
+  if (n) {
+    let pick = null;
+    for (let q = Math.round(n * 4) - 2; q <= Math.round(n * 4) + 2; q++) {
+      if (q < 16) continue;
+      const s = q / 4, g = Math.round(greyRatio(fam, s) * 100) / 100;
+      if (!pick || g < pick.g || (g === pick.g && Math.abs(s - n) < Math.abs(pick.s - n))) pick = {s, g};
+    }
+    if (pick && pick.g < 0.15) return pick;
+  }
+  let best = {s: 12, g: 1};
+  for (let q = 24; q <= 160; q++) {
+    const s = q / 4, g = greyRatio(fam, s);
+    if (g < 0.02) return {s, g};
+    if (g < best.g - 0.005) best = {s, g};
+  }
+  return best;
+}
+
+let scratchCanvas;
+function scratch(w, h) {
+  scratchCanvas ||= document.createElement("canvas");
+  if (scratchCanvas.width < w) scratchCanvas.width = w;
+  if (scratchCanvas.height < h) scratchCanvas.height = h;
+  return scratchCanvas;
+}
+
+/** One character drawn without anti-aliasing (alpha >= 50%), trimmed; null when the font lacks it. */
+function fontGlyph(fam, size, ch) {
+  const S = Math.ceil(size * 3) + 16, c = scratch(S, S), x = c.getContext("2d", {willReadFrequently: true});
+  const draw = fallback => {
+    x.clearRect(0, 0, S, S);
+    x.font = fontCss(size, fam, fallback); x.textBaseline = "alphabetic"; x.fillStyle = "#fff";
+    x.fillText(ch, 8, Math.round(S * 0.66));
+    const d = x.getImageData(0, 0, S, S).data, bits = new Uint8Array(S * S);
+    for (let i = 0; i < S * S; i++) bits[i] = d[i * 4 + 3] >= 128 ? 1 : 0;
+    return bits;
+  };
+  const a = draw("monospace"), b = draw("serif");
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return null;   // the browser substituted a font
+  const g = trim({w: S, h: S, bits: a}, 0, 0, S, S);
+  if (g) g.top -= Math.round(S * 0.66);
+  return g;
+}
+
+function sheetFromFont(fam, size, chars) {
+  const glyphs = new Map(), missing = [];
+  for (const ch of Array.from(chars)) {
+    if (glyphs.has(ch)) continue;
+    if (ch === " ") { glyphs.set(" ", SPACE()); continue; }
+    const g = fontGlyph(fam, size, ch);
+    if (g) glyphs.set(ch, g); else missing.push(ch);
+  }
+  const sheet = finish(glyphs);
+  if (sheet) sheet.missing = missing;
+  return sheet;
+}
+
+// ---- output -------------------------------------------------------------------------------
+
+function gridCanvas(sh, rgb = [255, 255, 255]) {
+  const n = sh.glyphs.size, rows = Math.ceil(n / COLS);
+  const c = document.createElement("canvas");
+  c.width = COLS * sh.cellW; c.height = rows * sh.cellH;
+  const x = c.getContext("2d"), img = x.createImageData(c.width, c.height);
+  let i = 0;
+  for (const g of sh.glyphs.values()) {
+    const cx = (i % COLS) * sh.cellW, cy = Math.floor(i / COLS) * sh.cellH + sh.baseline + g.top;
+    if (!g.space) for (let y = 0; y < g.h; y++) for (let xx = 0; xx < g.w; xx++) if (g.bits[y * g.w + xx]) {
+      const p = ((cy + y) * c.width + cx + xx) * 4;
+      if (p >= 0 && p < img.data.length) { img.data[p] = rgb[0]; img.data[p + 1] = rgb[1]; img.data[p + 2] = rgb[2]; img.data[p + 3] = 255; }
+    }
+    i++;
+  }
+  x.putImageData(img, 0, 0);
+  return c;
+}
+
+function textWidth(sh, s) {
+  let w = 0; const a = Array.from(s);
+  a.forEach((ch, i) => { const g = sh.glyphs.get(ch); w += (ch === " " || !g) ? sh.space : g.w; if (i < a.length - 1) w += GAP; });
+  return w;
+}
+
+function wrap(sh, text, width) {
+  const rows = [];
+  for (const para of text.split(/\n|\\n/)) {
+    let cur = "";
+    for (const word of para.split(/\s+/).filter(Boolean)) {
+      const t = cur ? cur + " " + word : word;
+      if (textWidth(sh, t) <= width || !cur) cur = t; else { rows.push(cur); cur = word; }
+    }
+    rows.push(cur);
+  }
+  return rows;
+}
+
+function drawText(ctx, sh, x, y, s, rgb) {
+  const img = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height), W = ctx.canvas.width;
+  for (const ch of Array.from(s)) {
+    const g = sh.glyphs.get(ch);
+    if (ch === " " || !g || g.space) { x += sh.space + GAP; continue; }
+    const top = y + sh.baseline + g.top;
+    for (let yy = 0; yy < g.h; yy++) for (let xx = 0; xx < g.w; xx++) if (g.bits[yy * g.w + xx]) {
+      const px = x + xx, py = top + yy;
+      if (px < 0 || py < 0 || px >= W || py >= ctx.canvas.height) continue;
+      const p = (py * W + px) * 4;
+      img.data[p] = rgb[0]; img.data[p + 1] = rgb[1]; img.data[p + 2] = rgb[2]; img.data[p + 3] = 255;
+    }
+    x += g.w + GAP;
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+function renderBox(sh) {
+  const c = $("box"), x = c.getContext("2d"), S = 3;
+  const spacing = Math.max(0, +$("spacing").value || 0), lineH = sh.cellH + spacing;
+  const fit = Math.max(1, Math.floor((BOX_H - 2 * PAD_Y) / lineH));
+  const plateH = 22, top = plateH - 6, W = BOX_W + 16, H = top + BOX_H + 6;
+  c.width = W; c.height = H;
+  x.fillStyle = "#3a3540"; x.fillRect(0, 0, W, H);                          // the scene behind
+  x.fillStyle = "rgba(22,20,30,.86)"; x.fillRect(8, top, BOX_W, BOX_H);
+  const who = $("who").value.trim();
+  if (who) {
+    const pw = textWidth(sh, who) + 2 * PAD_X;
+    x.fillStyle = "#34303f"; x.fillRect(16, 0, pw, plateH);
+    drawText(x, sh, 16 + PAD_X, Math.floor((plateH - sh.cellH) / 2), who, [255, 214, 140]);
+  }
+  const rows = wrap(sh, $("line").value, BOX_W - 2 * PAD_X);
+  rows.slice(0, fit).forEach((r, i) => drawText(x, sh, 8 + PAD_X, top + PAD_Y + i * lineH, r, [240, 236, 226]));
+  c.style.width = W * S + "px"; c.style.maxWidth = "none";
+  const per = Math.floor((BOX_W - 2 * PAD_X) / (textWidth(sh, "The quick brown fox jumps over the lazy dog") / 43));
+  $("fit").textContent = `~${per} chars × ${fit} lines · this line: ${rows.length} row${rows.length === 1 ? "" : "s"}` +
+    (rows.length > fit ? " (spills into a second box)" : "");
+  $("fit").className = "chip " + (rows.length > fit ? "warn" : "good");
+}
+
+function renderProof(sh) {
+  const S = sh.cellH <= 10 ? 5 : sh.cellH <= 16 ? 4 : 3, label = 16;
+  const cw = Math.max(sh.cellW * S, 22), chh = sh.cellH * S;
+  const n = sh.glyphs.size, rows = Math.ceil(n / COLS);
+  const c = $("proof"), x = c.getContext("2d");
+  c.width = COLS * (cw + 6) + 6; c.height = rows * (chh + label + 8) + 6;
+  const css = getComputedStyle(document.documentElement);
+  const ink = css.getPropertyValue("--ink").trim(), muted = css.getPropertyValue("--muted").trim();
+  x.fillStyle = css.getPropertyValue("--panel").trim(); x.fillRect(0, 0, c.width, c.height);
+  const grid = gridCanvas(sh, hexToRgb(ink));
+  x.imageSmoothingEnabled = false;
+  let i = 0;
+  for (const ch of sh.glyphs.keys()) {
+    const col = i % COLS, row = Math.floor(i / COLS);
+    const X = 6 + col * (cw + 6), Y = 6 + row * (chh + label + 8);
+    x.strokeStyle = css.getPropertyValue("--rule").trim(); x.strokeRect(X + .5, Y + .5, cw - 1, chh - 1);
+    x.drawImage(grid, col * sh.cellW, row * sh.cellH, sh.cellW, sh.cellH, X, Y, sh.cellW * S, chh);
+    x.fillStyle = "#e0784f"; x.fillRect(X, Y + sh.baseline * S, cw, 1);
+    x.fillStyle = muted; x.font = "12px " + css.getPropertyValue("--mono"); x.textAlign = "center";
+    x.fillText(ch === " " ? "space" : ch, X + cw / 2, Y + chh + 13);
+    i++;
+  }
+  c.style.width = c.width + "px";
+}
+
+function hexToRgb(s) {
+  const m = s.match(/^#([0-9a-f]{6})$/i);
+  if (!m) return [30, 30, 30];
+  const v = parseInt(m[1], 16); return [v >> 16, (v >> 8) & 255, v & 255];
+}
+
+function render() {
+  let sh = null;
+  if (state.kind === "sheet" && state.mask) {
+    const cw = +$("cellW").value, ch = +$("cellH").value;
+    const order = $("order").value === "custom" ? $("custom").value.replace(/\n/g, "")
+      : $("order").value === "ascii" ? ASCII : LATIN1;
+    if (cw >= 2 && ch >= 2) sh = sheetFromMask(state.mask, cw, ch, order);
+  } else if (state.kind === "font" && state.family) {
+    const size = +$("size").value;
+    if (size >= 4) sh = sheetFromFont(state.family, size, SETS[$("set").value]);
+    const g = greyRatio(state.family, size);
+    $("crisp").textContent = g < 0.02 ? "crisp at this size" : `${Math.round(g * 100)}% grey edges: not pixel-exact here`;
+    $("crisp").className = "status " + (g < 0.02 ? "good" : "warn");
+  }
+  state.sheet = sh;
+  if (!sh) { $("oCell").textContent = $("oBase").textContent = $("oChars").textContent = "–"; return; }
+  $("oCell").textContent = `${sh.cellW} × ${sh.cellH}`;
+  $("oBase").textContent = sh.baseline;
+  $("oCount").textContent = `(${sh.glyphs.size})`;
+  $("oChars").textContent = [...sh.glyphs.keys()].join("");
+  const grid = gridCanvas(sh);
+  const img = $("gridImg");
+  img.src = grid.toDataURL("image/png");
+  img.style.width = grid.width * 3 + "px"; img.style.maxWidth = "none";
+  const notes = [];
+  if (sh.missing?.length) notes.push(`Not in the font, left out: ${sh.missing.join(" ")}`);
+  if (sh.unassigned) notes.push(`${sh.unassigned} cells have no character in the order: add them to a custom order.`);
+  $("missing").textContent = notes.join(" ");
+  $("missing").className = "status " + (notes.length ? "warn" : "good");
+  if (!notes.length) $("missing").textContent = "Every glyph has a cell.";
+  renderBox(sh);
+  renderProof(sh);
+}
+
+// ---- loading ------------------------------------------------------------------------------
+
+function loadSheet(url, label, blob) {
+  const img = new Image();
+  img.onload = () => {
+    state = {kind: "sheet", mask: inkMask(img), file: blob || null, family: null, sheet: null};
+    const [cw, ch] = detectCell(state.mask);
+    $("cellW").value = cw; $("cellH").value = ch;
+    $("sheetOpts").hidden = false; $("fontOpts").hidden = true;
+    $("customWrap").hidden = $("order").value !== "custom";
+    $("askWrap").hidden = !sampleFn;
+    const cols = state.mask.w / cw, rows = state.mask.h / ch;
+    $("src").textContent = `${label} · ${state.mask.w}×${state.mask.h} px · detected ${cw}×${ch} cells, ${cols} × ${rows}`;
+    render();
+  };
+  img.onerror = () => { $("src").textContent = `Could not read ${label} as an image.`; };
+  img.src = url;
+}
+
+async function loadFont(file) {
+  const fam = "pack-" + Date.now();
+  try {
+    const face = new FontFace(fam, await file.arrayBuffer());
+    await face.load(); document.fonts.add(face);
+  } catch (e) { $("src").textContent = `Could not read ${file.name} as a font.`; return; }
+  $("src").textContent = `${file.name} · measuring its pixel grid…`;
+  await new Promise(r => setTimeout(r, 30));
+  const {s, g} = nativeSize(fam);
+  state = {kind: "font", mask: null, file, family: fam, sheet: null};
+  $("size").value = s;
+  $("sheetOpts").hidden = true; $("customWrap").hidden = true; $("askWrap").hidden = true; $("fontOpts").hidden = false;
+  $("src").textContent = `${file.name} · native size ${s}px` + (g < 0.02 ? "" : " (closest; adjust if it looks wrong)");
+  render();
+}
+
+function take(file) {
+  if (!file) return;
+  const base = file.name.replace(/\.[^.]+$/, "");
+  $("name").value = base.replace(/[-_]+/g, " ");
+  if (/\.(ttf|otf)$/i.test(file.name)) loadFont(file);
+  else loadSheet(URL.createObjectURL(file), file.name, file);
+}
+
+$("file").addEventListener("change", e => take(e.target.files[0]));
+const drop = $("drop");
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("over"); take(e.dataTransfer.files[0]); });
+for (const id of ["cellW", "cellH", "custom", "size", "set", "who", "line", "spacing"])
+  $(id).addEventListener("input", render);
+$("order").addEventListener("change", () => {
+  if ($("order").value === "custom" && !$("custom").value)
+    $("custom").value = state.sheet ? [...state.sheet.glyphs.keys()].join("") : LATIN1;
+  $("customWrap").hidden = $("order").value !== "custom";
+  render();
+});
+
+// ---- copy, save ---------------------------------------------------------------------------
+
+const slug = () => ($("name").value.trim() || "font").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "font";
+const settings = () => state.sheet ? `name      ${$("name").value.trim()}\ncell      ${state.sheet.cellW} x ${state.sheet.cellH}\n` +
+  `baseline  ${state.sheet.baseline}\ncharacters (${state.sheet.glyphs.size}):\n${[...state.sheet.glyphs.keys()].join("")}\n` : "";
+const note = (t, cls = "good") => { $("saveNote").textContent = t; $("saveNote").className = "status " + cls; };
+
+$("copyChars").addEventListener("click", async () => {
+  if (!state.sheet) return;
+  const text = [...state.sheet.glyphs.keys()].join("");
+  try { await navigator.clipboard.writeText(text); note("Characters copied."); }
+  catch (e) {
+    const r = document.createRange(); r.selectNodeContents($("oChars"));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    note("Selected: press Ctrl+C.", "warn");
+  }
+});
+
+let downloads = null, sampleFn = null;
+async function save(filename, data) {
+  if (!downloads) { note("Saving is not available here: right-click the grid → Save image as.", "warn"); return; }
+  try { await downloads.save({filename, data}); note(`Saved ${filename}.`); }
+  catch (e) {
+    const m = {declined: "Not saved.", rate_limited: "A save is already waiting for an answer."}[e?.code];
+    note(m || "Saving is not available here: right-click the grid → Save image as.", "warn");
+  }
+}
+$("savePng").addEventListener("click", () => {
+  if (!state.sheet) return;
+  gridCanvas(state.sheet).toBlob(b => b && save(slug() + ".png", b), "image/png");
+});
+$("saveTxt").addEventListener("click", () => state.sheet && save(slug() + ".txt", settings()));
+
+// ---- asking Claude to read a sheet ---------------------------------------------------------
+
+let askCtl = null;
+$("askStop").addEventListener("click", () => askCtl?.abort());
+$("ask").addEventListener("click", async () => {
+  if (!sampleFn || !state.mask) return;
+  const cw = +$("cellW").value, ch = +$("cellH").value, cols = state.mask.w / cw, rows = state.mask.h / ch;
+  // Send the sheet enlarged, dark on light, with its grid drawn in, so each cell is unambiguous.
+  const S = Math.max(4, Math.floor(48 / ch)), c = document.createElement("canvas");
+  c.width = state.mask.w * S; c.height = state.mask.h * S;
+  const x = c.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.fillStyle = "#000";
+  for (let y = 0; y < state.mask.h; y++) for (let xx = 0; xx < state.mask.w; xx++)
+    if (state.mask.bits[y * state.mask.w + xx]) x.fillRect(xx * S, y * S, S, S);
+  x.strokeStyle = "#e0784f"; x.lineWidth = 1;
+  for (let i = 0; i <= cols; i++) { x.beginPath(); x.moveTo(i * cw * S + .5, 0); x.lineTo(i * cw * S + .5, c.height); x.stroke(); }
+  for (let i = 0; i <= rows; i++) { x.beginPath(); x.moveTo(0, i * ch * S + .5); x.lineTo(c.width, i * ch * S + .5); x.stroke(); }
+  const blob = await new Promise(r => c.toBlob(r, "image/png"));
+  askCtl = new AbortController();
+  $("ask").disabled = true; $("askStop").hidden = false; $("askNote").textContent = "Reading the sheet…";
+  try {
+    const out = await sampleFn.json(
+      `The image is a pixel-font glyph sheet, enlarged, black glyphs on white, with orange lines marking a grid of ` +
+      `${cols} columns by ${rows} rows of equal cells. Read every cell left to right, top to bottom, and say which ` +
+      `character it holds. Use a space for an empty cell (and for the space glyph, usually the first cell). ` +
+      `Prefer the exact Unicode character (curly quotes, accented letters, symbols) over an ASCII lookalike. ` +
+      `Reply with only JSON: {"rows": ["<exactly ${cols} characters>", ...]} with ${rows} strings.`,
+      {images: blob, signal: askCtl.signal});
+    const got = Array.isArray(out?.rows) ? out.rows.map(String) : null;
+    if (!got) throw {code: "invalid_json"};
+    const fixed = got.map(r => { const a = Array.from(r); while (a.length < cols) a.push(" "); return a.slice(0, cols).join(""); });
+    $("custom").value = fixed.join("\n");
+    $("order").value = "custom"; $("customWrap").hidden = false;
+    $("askNote").textContent = "Filled in the custom order. Check the proof below; fix any cell by hand.";
+    render();
+  } catch (e) {
+    const m = {cancelled: "Stopped.", not_granted: "Claude was not allowed for this page.",
+      rate_limited: "Too many requests just now; try again in a while.", invalid_json: "The answer was not usable; try again.",
+      images_unavailable: "This view cannot send images to Claude."}[e?.code];
+    $("askNote").textContent = m || "Could not reach Claude; try again.";
+    if (["not_granted", "images_unavailable", "sampling_disabled"].includes(e?.code)) $("askWrap").hidden = true;
+  } finally { $("ask").disabled = false; $("askStop").hidden = true; }
+});
+
+// ---- start --------------------------------------------------------------------------------
+
+loadSheet(EXAMPLE, "Example: Cozette (MIT)");
+(async () => {
+  if (!window.claude?.use) return;
+  downloads = await window.claude.use("downloads");
+  const s = await window.claude.use("sample");
+  if (s) {
+    const lim = await s.limits().catch(() => null);
+    if (lim?.images) { sampleFn = s; if (state.kind === "sheet") $("askWrap").hidden = false; }
+  }
+})();
+})();
+</script>

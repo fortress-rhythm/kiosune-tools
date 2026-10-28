@@ -1,0 +1,7 @@
+# `[then label]` is a real edge: credits is reached
+@label a
+@end Done [key done] [then credits]
+
+@label credits
+: Thanks for playing.
+@end Credits [key credits]

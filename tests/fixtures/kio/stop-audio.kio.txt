@@ -1,0 +1,9 @@
+# `@stop music 1500` is audio and the script carries on; only a bare `@stop` ends the chain.
+# The label below is the point: read as terminal, it would leave `ending` unreachable.
+@label a
+@stop music 1500
+: The room goes quiet.
+@jump ending
+
+@label ending
+@end Done [key done]

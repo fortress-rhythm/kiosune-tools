@@ -1,0 +1,7 @@
+# the cheat sheet has @nvl [clear] but a bare @adv
+@scene Library · now | fade 900
+@nvl clear
+She reads the notice twice.
+@adv clear
+Laila (neutral): Right.
+@end Done

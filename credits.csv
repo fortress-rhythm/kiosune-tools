@@ -1,0 +1,11 @@
+﻿section,include,scope,kind,name,my_name,by,by_url,url,site,license,license_url,cost,role,ai,thanks,notes
+meta,yes,both,,title,,,,,,,,,,,,kiosune-tools
+meta,yes,both,,author,,,,,,,,,,,,fortress-rhythm
+meta,yes,both,,author_url,,,,,,,,,,,,https://github.com/fortress-rhythm
+meta,yes,both,,year,,,,,,,,,,,,2026
+meta,yes,both,,intro,,,,,,,,,,,,Unofficial tools for writing Kiosune Studio scripts. Not made by or affiliated with Kiosune Studio.
+meta,yes,both,,ai_note,,,,,,,,,,,,
+framework,yes,tools,engine,Kiosune Studio,,MelloTod,,https://mellotoddtv.itch.io/kiosune-studio,,,,,,,Thank you for the engine.,REVIEW: thanks line carried over from Overdue and shortened; reword or delete.
+tool,yes,tools,code,Claude Code,,Anthropic,,https://claude.ai/code,,,,,coding assistant; see Generative AI below,yes,,
+ai,yes,tools,code,Claude,,Anthropic,,,,,,,"wrote the script checkers, the VS Code extension, the font packer and this credits tool, to my specification and review.",ships,,"REVIEW: carried over from the Overdue credits (tools scope), drafted by Claude from that git history; reword, rescope or delete."
+terms,yes,tools,code,Tools and source code,,fortress-rhythm,,,,MIT,https://github.com/fortress-rhythm/kiosune-tools/blob/main/LICENSE,,,,,

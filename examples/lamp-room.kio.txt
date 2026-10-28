@@ -1,0 +1,138 @@
+# The Lamp Room — a sample Kiosune script for kiosune-tools
+# Small on purpose: two chapters, a hub, a subroutine, a router and three endings, so every
+# check and every view in the extension has something to show.
+#
+# HOW TO USE
+#   ___        yours to write
+#   # BEAT:    what the line(s) below must accomplish
+#   # FX:      anchor for an effects pass
+#
+#   Backgrounds  Harbour · dusk  ·  Lighthouse · stairs  ·  Lighthouse · lamp room
+#   Cast         Mara, Tobin, Radio
+#   Variables    turns number 0..12 · trust number 0..100 · oil number 0..3
+#                hasKey flag · askedName flag · late flag
+
+== Evening
+
+@scene Harbour · dusk | fade 900
+@set turns = 0
+@set trust = 20
+@set oil = 0
+@set hasKey = no
+@set askedName = no
+@set late = no
+@show Mara at left as neutral
+@show Tobin at right as worried
+@transition dissolve 500
+# FX: the light is going, and the lamp is not lit
+Tobin (worried): The lamp's dark. Ships are already turning for the point.
+Mara (neutral): Then we'd better climb.
+? Before they go in
+- Ask his name -> ask_name [set askedName = yes; trust += 10]
+- Just go -> stairs
+
+@label ask_name
+Mara (neutral): I never asked your name.
+Tobin (relieved): Tobin. I keep the ferry.
+@jump stairs
+
+@label stairs
+== Night
+@scene Lighthouse · stairs | fade 600
+@show Mara at left as determined
+@transition dissolve 300
+: Two hundred steps: and every one of them wet.
+@jump hub
+
+@label hub
+@set turns += 1
+@if turns >= 8 -> closing
+@call weather
+@jump hub_menu
+
+@label weather
+@router
+- turns >= 6 -> weather_storm
+- turns >= 3 -> weather_wind
+- else -> weather_calm
+
+@label weather_calm
+The sea is flat and grey below the window slits.
+@return
+
+@label weather_wind
+Wind finds every gap in the stonework.
+@return
+
+@label weather_storm
+@shake 4 400
+Rain hammers the glass. Somewhere below, a horn sounds twice.
+@return
+
+@label hub_menu
+@when oil < 3
+Mara (worried): The tank needs filling before anything else.
+? What now
+- Carry oil up -> carry_oil [if oil < 3]
+- Ask Tobin for the key -> ask_key [if not hasKey]
+- Call the harbour -> radio
+- Open the lamp room -> lamp_room [if hasKey and oil >= 3]
+- Leave it dark -> end_dark
+
+@label carry_oil
+@set oil += 1
+Mara (determined): One more can.
+@jump hub
+
+@label ask_key
+@if trust >= 30 -> key_given else key_refused
+
+@label key_given
+@set hasKey = yes
+Tobin (neutral): Here. It sticks, so lift as you turn.
+@jump hub
+
+@label key_refused
+@set trust += 10
+Tobin (worried): I don't know you well enough yet.
+@jump hub
+
+@label radio
+Radio: ___
+@when askedName
+Mara (neutral): Tobin's with me. Tell his wife.
+@jump hub
+
+@label closing
+@set late = yes
+Radio: Too late. The last ship has gone round the point.
+@jump end_dark
+
+@label lamp_room
+@scene Lighthouse · lamp room | fade 900
+@show Mara at center as relieved
+@transition dissolve 500
+# BEAT: the light comes on, and it is the first thing she has done right all night
+# FX: the lens turning
+: ___
+@if late -> end_late
+@jump end_lit
+
+@label end_lit
+Mara (relieved): There. Let them see it.
+@end The Light Holds [key lit] [then credits]
+
+@label end_late
+Mara (sad): Lit, for nobody.
+@end Lit Too Late [key late] [then credits]
+
+@label end_dark
+@hide Tobin
+@transition dissolve 400
+The tower stays dark, and the sea keeps its own counsel.
+@end Dark Water [key dark] [then credits]
+
+@label credits
+@scene - | fade 1400
+THE LAMP ROOM
+@stop

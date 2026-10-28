@@ -1,0 +1,22 @@
+# Normalise line endings in the repo; Windows checkouts get CRLF as usual.
+* text=auto
+
+# Text formats these repos live in.
+*.kio.txt text
+*.md      text
+*.py      text
+*.js      text
+*.json    text
+*.toml    text
+
+# Shell scripts run under bash/WSL -- always LF, even on a Windows checkout.
+*.sh      text eol=lf
+
+# Binary -- never diff or normalise.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ogg  binary
+*.wav  binary
+*.mp3  binary

@@ -1,0 +1,2 @@
+@label a
+: She puts it back on the shelf.

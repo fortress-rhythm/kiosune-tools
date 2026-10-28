@@ -1,0 +1,7 @@
+@label a
+@when late
+@when tookKey
+: Both are true.
+@set late = yes
+@set tookKey = yes
+@end Done [key done]

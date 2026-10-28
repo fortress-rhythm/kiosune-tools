@@ -1,0 +1,6 @@
+@label menu
+? Say something  [timer 9000 9]
+- Push -> ending
+- Say nothing -> ending
+@label ending
+@end Done [key done]

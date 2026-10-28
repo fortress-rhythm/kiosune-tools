@@ -1,0 +1,4 @@
+@label a
+@jump nowhere
+@label b
+@end Done [key done]

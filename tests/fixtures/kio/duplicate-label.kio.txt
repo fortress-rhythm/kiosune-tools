@@ -1,0 +1,6 @@
+@label twice
+: First.
+@jump twice
+@label twice
+: Second.
+@end Done [key done]

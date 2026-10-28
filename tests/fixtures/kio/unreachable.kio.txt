@@ -1,0 +1,7 @@
+@label a
+@jump b
+@label orphan
+: Nothing leads here.
+@jump b
+@label b
+@end Done [key done]

@@ -1,0 +1,297 @@
+{
+  "name": "kiosune",
+  "displayName": "Kiosune Script",
+  "description": "Unofficial support for Kiosune Studio scripts: highlighting, variables, flow checks and a scene map.",
+  "version": "0.1.0",
+  "publisher": "fortress-rhythm",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fortress-rhythm/kiosune-tools.git",
+    "directory": "vscode-kiosune"
+  },
+  "bugs": {
+    "url": "https://github.com/fortress-rhythm/kiosune-tools/issues"
+  },
+  "homepage": "https://github.com/fortress-rhythm/kiosune-tools/tree/main/vscode-kiosune#readme",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization",
+    "Linters"
+  ],
+  "keywords": [
+    "kiosune",
+    "visual novel",
+    "screenplay",
+    "kio"
+  ],
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "onLanguage:kiosune",
+    "onView:kiosune.story",
+    "onView:kiosune.variables",
+    "onView:kiosune.assets",
+    "onView:kiosune.todo"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "kiosune",
+        "aliases": [
+          "Kiosune Script",
+          "kiosune"
+        ],
+        "extensions": [
+          ".kio",
+          ".kiosune"
+        ],
+        "filenamePatterns": [
+          "*.kio.txt"
+        ],
+        "firstLine": "^(#.*\\bKiosune\\b|@scene\\b|@label\\b)",
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./media/file-icon.svg",
+          "dark": "./media/file-icon.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "kiosune",
+        "scopeName": "source.kiosune",
+        "path": "./syntaxes/kiosune.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "kiosune.showSceneMap",
+        "title": "Show Scene Map",
+        "category": "Kiosune",
+        "icon": "$(type-hierarchy)"
+      },
+      {
+        "command": "kiosune.check",
+        "title": "Check Script",
+        "category": "Kiosune",
+        "icon": "$(check-all)"
+      },
+      {
+        "command": "kiosune.exportSceneMap",
+        "title": "Export Scene Map as SVG",
+        "category": "Kiosune"
+      },
+      {
+        "command": "kiosune.nextPlaceholder",
+        "title": "Go to Next Placeholder",
+        "category": "Kiosune"
+      },
+      {
+        "command": "kiosune.useKiosuneLanguage",
+        "title": "Treat This File as a Kiosune Script",
+        "category": "Kiosune"
+      },
+      {
+        "command": "kiosune.refreshViews",
+        "title": "Refresh",
+        "category": "Kiosune",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "kiosune.reveal",
+        "title": "Reveal Line",
+        "category": "Kiosune"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "kiosune.showSceneMap",
+          "when": "resourceLangId == kiosune",
+          "group": "navigation@1"
+        },
+        {
+          "command": "kiosune.check",
+          "when": "resourceLangId == kiosune",
+          "group": "navigation@2"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "kiosune.refreshViews",
+          "when": "view == kiosune.variables",
+          "group": "navigation"
+        },
+        {
+          "command": "kiosune.showSceneMap",
+          "when": "view == kiosune.story",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "kiosune.reveal",
+          "when": "false"
+        },
+        {
+          "command": "kiosune.refreshViews",
+          "when": "false"
+        },
+        {
+          "command": "kiosune.showSceneMap",
+          "when": "resourceLangId == kiosune"
+        },
+        {
+          "command": "kiosune.check",
+          "when": "resourceLangId == kiosune"
+        },
+        {
+          "command": "kiosune.exportSceneMap",
+          "when": "resourceLangId == kiosune"
+        },
+        {
+          "command": "kiosune.nextPlaceholder",
+          "when": "resourceLangId == kiosune"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "kiosune",
+          "title": "Kiosune",
+          "icon": "media/activity-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "kiosune": [
+        {
+          "id": "kiosune.story",
+          "name": "Story",
+          "contextualTitle": "Kiosune"
+        },
+        {
+          "id": "kiosune.variables",
+          "name": "Variables",
+          "contextualTitle": "Kiosune"
+        },
+        {
+          "id": "kiosune.assets",
+          "name": "Cast & assets",
+          "contextualTitle": "Kiosune"
+        },
+        {
+          "id": "kiosune.todo",
+          "name": "Still to write",
+          "contextualTitle": "Kiosune"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Kiosune",
+      "properties": {
+        "kiosune.diagnostics.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run the flow checks and show them as problems."
+        },
+        "kiosune.diagnostics.placeholders": {
+          "type": "string",
+          "enum": [
+            "off",
+            "hint",
+            "information",
+            "warning"
+          ],
+          "default": "hint",
+          "description": "How to report unwritten placeholders (___)."
+        },
+        "kiosune.diagnostics.unprefixedColon": {
+          "type": "string",
+          "enum": [
+            "off",
+            "hint",
+            "warning"
+          ],
+          "default": "warning",
+          "markdownDescription": "Report narration whose text before a colon could import as a junk speaker. Prefix such lines with `:`."
+        },
+        "kiosune.diagnostics.unknownDirective": {
+          "type": "string",
+          "enum": [
+            "off",
+            "hint",
+            "warning"
+          ],
+          "default": "warning",
+          "markdownDescription": "Report `@directives` this extension does not know. Turn down if your build has commands the guide does not list."
+        },
+        "kiosune.diagnostics.unusedVariables": {
+          "type": "boolean",
+          "default": true,
+          "description": "Report variables that are written but never read, or read but never written."
+        },
+        "kiosune.extraDirectives": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "Extra `@directive` names to accept without a warning, for a studio build newer than this extension."
+        },
+        "kiosune.inlayHints": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Show how many ways lead into each `@label`, at the end of its line."
+        },
+        "kiosune.placeholderToken": {
+          "type": "string",
+          "default": "___",
+          "description": "The token that marks text you have not written yet."
+        },
+        "kiosune.decorations.placeholders": {
+          "type": "boolean",
+          "default": true,
+          "description": "Underline placeholders in the editor so unwritten lines are obvious."
+        },
+        "kiosune.sceneMap.showFallthrough": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Draw the dashed edges where a block runs on into the next `@label` instead of jumping."
+        },
+        "kiosune.sceneMap.followCursor": {
+          "type": "boolean",
+          "default": true,
+          "description": "Highlight the block the cursor is in while you edit."
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[kiosune]": {
+        "editor.wordWrap": "on",
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.semanticHighlighting.enabled": true,
+        "editor.suggest.showWords": false
+      }
+    }
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.1.0"
+  }
+}

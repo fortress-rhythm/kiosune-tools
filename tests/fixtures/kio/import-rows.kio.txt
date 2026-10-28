@@ -1,0 +1,10 @@
+# @import rows carry a glob and assignments, and no arrow
+@import "Save code" -> resumed else fresh case
+- HONEY-A* : trust = 70
+- +L : trust = 20
+
+@label resumed
+@if trust >= 50 -> fresh
+
+@label fresh
+@end Done [key done]

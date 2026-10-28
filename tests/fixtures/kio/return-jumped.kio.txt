@@ -1,0 +1,12 @@
+# a choice jumps into a subroutine, so its @return has no caller
+@scene Library · now | fade 900
+? What now
+- Remember -> recall
+- Leave -> ending
+
+@label recall
+Laila (neutral): She almost has it.
+@return
+
+@label ending
+@end Done

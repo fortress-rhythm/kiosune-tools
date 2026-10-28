@@ -1,0 +1,5 @@
+# a trailing comment on a directive is read as part of the command
+@scene Library · now | fade 900
+@show Laila at right as neutral # FX: make her enter
+Laila (neutral): Here.
+@end Done

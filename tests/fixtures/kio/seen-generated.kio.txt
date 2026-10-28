@@ -1,0 +1,8 @@
+@label l_42
+: The true ending happened.
+@label menu
+? Which one
+- Ordinary -> ending
+- Secret -> ending [if seen(l_42)]
+@label ending
+@end Done [key done]

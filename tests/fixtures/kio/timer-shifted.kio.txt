@@ -1,0 +1,9 @@
+@set honest = yes
+@if honest -> menu else menu
+@label menu
+? Say something  [timer 9000 3]
+- Tell the truth -> ending [if honest]
+- Push -> ending
+- Say nothing -> ending
+@label ending
+@end Done [key done]

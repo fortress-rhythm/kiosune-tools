@@ -1,0 +1,5 @@
+@label a
+@when late
+
+: She is late.
+@end Done [key done]

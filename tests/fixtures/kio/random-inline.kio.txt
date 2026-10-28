@@ -1,0 +1,9 @@
+# @random takes its weights inline, after a colon
+@label top
+@random: 3 -> quiet, 1 -> flicker
+
+@label quiet
+@end Quiet [key quiet]
+
+@label flicker
+@end Flicker [key flicker]

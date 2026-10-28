@@ -1,0 +1,17 @@
+# subroutines used correctly: a branch inside one, and a call that returns to a label
+@scene Library · now | fade 900
+@set late = yes
+@call recall
+@call recall return ending
+
+@label recall
+@if late -> recall_late
+Laila (neutral): She almost has it.
+@return
+
+@label recall_late
+Laila (neutral): Too late to remember.
+@return
+
+@label ending
+@end Done

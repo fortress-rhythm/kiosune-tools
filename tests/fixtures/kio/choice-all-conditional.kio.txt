@@ -1,0 +1,8 @@
+@set hasKey = yes
+@if hasKey -> menu else menu
+@label menu
+? Which one
+- Unlock it -> ending [if hasKey]
+- Force it -> ending [if hasKey]
+@label ending
+@end Done [key done]

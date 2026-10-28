@@ -1,0 +1,832 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Kiosune Script",
+  "scopeName": "source.kiosune",
+  "patterns": [
+    {
+      "include": "#pragma"
+    },
+    {
+      "include": "#comment"
+    },
+    {
+      "include": "#chapter"
+    },
+    {
+      "include": "#scene"
+    },
+    {
+      "include": "#stage"
+    },
+    {
+      "include": "#fx"
+    },
+    {
+      "include": "#transition"
+    },
+    {
+      "include": "#label"
+    },
+    {
+      "include": "#jump"
+    },
+    {
+      "include": "#flow"
+    },
+    {
+      "include": "#assign"
+    },
+    {
+      "include": "#input"
+    },
+    {
+      "include": "#ending"
+    },
+    {
+      "include": "#stop"
+    },
+    {
+      "include": "#audio"
+    },
+    {
+      "include": "#directive"
+    },
+    {
+      "include": "#choice"
+    },
+    {
+      "include": "#router-row"
+    },
+    {
+      "include": "#option"
+    },
+    {
+      "include": "#narration"
+    },
+    {
+      "include": "#dialogue"
+    },
+    {
+      "include": "#prose"
+    }
+  ],
+  "repository": {
+    "pragma": {
+      "match": "^\\s*(#!)[ \\t]*([A-Za-z]+)[ \\t]*(:)?(.*)$",
+      "name": "meta.preprocessor.kiosune",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.comment.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.pragma.kiosune"
+        },
+        "3": {
+          "name": "punctuation.separator.kiosune"
+        },
+        "4": {
+          "name": "string.unquoted.pragma.kiosune"
+        }
+      }
+    },
+    "comment": {
+      "match": "^\\s*(#)[ \\t]*(BEAT|STATE|FX|FX-NONE|SOUND|TODO|NOTE|P[0-9])?(:)?(.*)$",
+      "name": "comment.line.number-sign.kiosune",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.comment.kiosune"
+        },
+        "2": {
+          "name": "keyword.other.anchor.kiosune"
+        },
+        "4": {
+          "patterns": [
+            {
+              "include": "#placeholder"
+            }
+          ]
+        }
+      }
+    },
+    "chapter": {
+      "match": "^\\s*(==)[ \\t]*(.*)$",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.heading.kiosune"
+        },
+        "2": {
+          "name": "entity.name.section.chapter.kiosune"
+        }
+      }
+    },
+    "scene": {
+      "match": "^\\s*(@)(scene)(?:[ \\t]+([^|#]*?))?(?:[ \\t]+(keep))?[ \\t]*(?:(\\|)[ \\t]*([A-Za-z]+)?[ \\t]*([0-9]+)?)?[ \\t]*$",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.keyword.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.scene.kiosune"
+        },
+        "3": {
+          "name": "entity.name.type.background.kiosune"
+        },
+        "4": {
+          "name": "keyword.other.kiosune"
+        },
+        "5": {
+          "name": "punctuation.separator.kiosune"
+        },
+        "6": {
+          "name": "support.function.transition.kiosune"
+        },
+        "7": {
+          "name": "constant.numeric.kiosune"
+        }
+      }
+    },
+    "stage": {
+      "begin": "^\\s*(@)(show|move|hide)(?:[ \\t]+(\\S+(?:[ \\t]+\\S+)*?))?(?=[ \\t]+(?:at|as|to|part|scale|z|glide|flip|dim|enter|exit)\\b|[ \\t]*$)",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.stage.kiosune"
+        },
+        "3": {
+          "name": "entity.name.type.character.kiosune"
+        }
+      },
+      "patterns": [
+        {
+          "match": "\\b(at|as|to|part|scale|z|glide|flip|dim|enter|exit)\\b",
+          "name": "keyword.other.kiosune"
+        },
+        {
+          "match": "\\b(farleft|left|center|right|farright|offscreen)\\b",
+          "name": "constant.language.position.kiosune"
+        },
+        {
+          "match": "\\b(fade|slideleft|slideright|drop|rise)\\b",
+          "name": "support.function.transition.kiosune"
+        },
+        {
+          "match": "-?[0-9]+(?:,-?[0-9]+)?",
+          "name": "constant.numeric.kiosune"
+        },
+        {
+          "match": "[A-Za-z_][\\w-]*:[\\w-]+",
+          "name": "variable.parameter.part.kiosune"
+        },
+        {
+          "match": "[A-Za-z_][\\w-]*",
+          "name": "variable.parameter.expression.kiosune"
+        },
+        {
+          "include": "#comment-trailing"
+        }
+      ]
+    },
+    "label": {
+      "match": "^\\s*(@)(label)[ \\t]+(\\S+)",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.keyword.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.label.kiosune"
+        },
+        "3": {
+          "name": "entity.name.function.label.kiosune"
+        }
+      }
+    },
+    "jump": {
+      "match": "^\\s*(@)(jump|call)[ \\t]+(\\S+)(?:[ \\t]+(return)(?:[ \\t]+(\\S+))?)?(?:[ \\t]+(call))?",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.keyword.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.flow.kiosune"
+        },
+        "3": {
+          "name": "entity.name.function.kiosune"
+        },
+        "4": {
+          "name": "keyword.other.kiosune"
+        },
+        "5": {
+          "name": "entity.name.function.kiosune"
+        },
+        "6": {
+          "name": "keyword.other.kiosune"
+        }
+      }
+    },
+    "flow": {
+      "begin": "^\\s*(@)(if|when|router|switch|random|return)\\b",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.flow.kiosune"
+        }
+      },
+      "patterns": [
+        {
+          "match": "\\b(else)[ \\t]+(?!->)([A-Za-z_][\\w.-]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.flow.kiosune"
+            },
+            "2": {
+              "name": "entity.name.function.kiosune"
+            }
+          }
+        },
+        {
+          "include": "#arrow"
+        },
+        {
+          "include": "#condition"
+        },
+        {
+          "include": "#comment-trailing"
+        }
+      ]
+    },
+    "assign": {
+      "begin": "^\\s*(@)(set|toggle)[ \\t]+([A-Za-z_]\\w*)",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.set.kiosune"
+        },
+        "3": {
+          "name": "variable.other.kiosune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#condition"
+        },
+        {
+          "include": "#comment-trailing"
+        }
+      ]
+    },
+    "input": {
+      "begin": "^\\s*(@)(input)[ \\t]+([A-Za-z_]\\w*)",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.input.kiosune"
+        },
+        "3": {
+          "name": "variable.other.kiosune"
+        }
+      },
+      "patterns": [
+        {
+          "match": "\\b(max|default)\\b",
+          "name": "keyword.other.kiosune"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#number"
+        },
+        {
+          "include": "#placeholder"
+        }
+      ]
+    },
+    "ending": {
+      "begin": "^\\s*(@)(end)[ \\t]*",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.end.kiosune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#tag"
+        },
+        {
+          "include": "#placeholder"
+        },
+        {
+          "match": "[^\\[]+",
+          "name": "entity.name.section.ending.kiosune"
+        }
+      ]
+    },
+    "audio": {
+      "begin": "^\\s*(@)(music|ambience|sfx|voice)\\b",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.audio.kiosune"
+        }
+      },
+      "patterns": [
+        {
+          "match": "\\b(loop|once|fade|crossfade|volume)\\b",
+          "name": "keyword.other.kiosune"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#number"
+        },
+        {
+          "match": "[^\\s].*?(?=\\s+(?:loop|fade|once)\\b|$)",
+          "name": "string.unquoted.cue.kiosune"
+        }
+      ]
+    },
+    "directive": {
+      "begin": "^\\s*(@)([A-Za-z][\\w-]*)",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.kiosune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#sigil"
+        },
+        {
+          "match": "\\b(else)[ \\t]+(?!->)([A-Za-z_][\\w.-]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.flow.kiosune"
+            },
+            "2": {
+              "name": "entity.name.function.kiosune"
+            }
+          }
+        },
+        {
+          "match": "\\b(case|then|nowait|stay|click|showui|fit|offset|contain|cover|none|textbox|nameplate|menu)\\b",
+          "name": "keyword.other.kiosune"
+        },
+        {
+          "include": "#tag"
+        },
+        {
+          "include": "#arrow"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#color"
+        },
+        {
+          "include": "#number"
+        },
+        {
+          "match": "\\b(off|on|keep|clear|to|as|at|ease)\\b",
+          "name": "keyword.other.kiosune"
+        },
+        {
+          "include": "#placeholder"
+        },
+        {
+          "include": "#comment-trailing"
+        }
+      ]
+    },
+    "choice": {
+      "begin": "^\\s*(\\?)",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.choice.kiosune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#tag"
+        },
+        {
+          "include": "#markup"
+        },
+        {
+          "include": "#placeholder"
+        }
+      ]
+    },
+    "router-row": {
+      "begin": "^\\s*(-)[ \\t]*(?=(?:else\\b|[A-Za-z_][\\w.]*[ \\t]*(?:>=|<=|!=|==|=|>|<)|(?:not|seen|visited)\\b)[^\\[]*->)",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.option.kiosune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#arrow"
+        },
+        {
+          "include": "#tag"
+        },
+        {
+          "include": "#condition"
+        }
+      ]
+    },
+    "option": {
+      "begin": "^\\s*(-)[ \\t]*",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.option.kiosune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#tag"
+        },
+        {
+          "include": "#arrow"
+        },
+        {
+          "include": "#markup"
+        },
+        {
+          "include": "#placeholder"
+        }
+      ]
+    },
+    "narration": {
+      "begin": "^\\s*(:)",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.narration.kiosune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#markup"
+        },
+        {
+          "include": "#placeholder"
+        }
+      ]
+    },
+    "dialogue": {
+      "begin": "^\\s*([~!+^_][ \\t]*)?([^:@?#\\-][^:]{0,58}?)(?:[ \\t]*\\(([^)]*)\\))?(?:[ \\t]+(as)[ \\t]+(\"[^\"]*\"))?(:)",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.operator.style.kiosune"
+        },
+        "2": {
+          "name": "entity.name.type.character.kiosune"
+        },
+        "3": {
+          "name": "variable.parameter.expression.kiosune"
+        },
+        "4": {
+          "name": "keyword.other.kiosune"
+        },
+        "5": {
+          "name": "string.quoted.double.kiosune"
+        },
+        "6": {
+          "name": "punctuation.separator.dialogue.kiosune"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#markup"
+        },
+        {
+          "include": "#placeholder"
+        }
+      ]
+    },
+    "prose": {
+      "patterns": [
+        {
+          "include": "#markup"
+        },
+        {
+          "include": "#placeholder"
+        }
+      ]
+    },
+    "tag": {
+      "begin": "(\\[)([A-Za-z][\\w-]*)",
+      "end": "(\\])",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.kiosune"
+        },
+        "2": {
+          "name": "support.function.tag.kiosune"
+        }
+      },
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.end.kiosune"
+        }
+      },
+      "name": "meta.tag.kiosune",
+      "patterns": [
+        {
+          "match": "(?<=then)[ \\t]+([A-Za-z_][\\w.-]*)",
+          "captures": {
+            "1": {
+              "name": "entity.name.function.kiosune"
+            }
+          }
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#condition"
+        },
+        {
+          "include": "#placeholder"
+        }
+      ]
+    },
+    "arrow": {
+      "match": "(->)[ \\t]*([A-Za-z_][\\w.-]*)?",
+      "captures": {
+        "1": {
+          "name": "keyword.operator.arrow.kiosune"
+        },
+        "2": {
+          "name": "entity.name.function.kiosune"
+        }
+      }
+    },
+    "condition": {
+      "patterns": [
+        {
+          "include": "#sigil"
+        },
+        {
+          "match": "\\b(and|or|not|else|is|isnt)\\b",
+          "name": "keyword.operator.logical.kiosune"
+        },
+        {
+          "match": "\\b(yes|no|true|false|off|on|none)\\b",
+          "name": "constant.language.kiosune"
+        },
+        {
+          "match": "\\b(seen|visited|random|rand)\\b(?=\\s*\\()",
+          "name": "support.function.builtin.kiosune"
+        },
+        {
+          "match": "%?(\\+=|-=|\\*=|/=|>=|<=|!=|==|=|>|<)",
+          "name": "keyword.operator.kiosune"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#color"
+        },
+        {
+          "include": "#number"
+        },
+        {
+          "include": "#placeholder"
+        },
+        {
+          "match": "[A-Za-z_][\\w.]*",
+          "name": "variable.other.kiosune"
+        }
+      ]
+    },
+    "markup": {
+      "patterns": [
+        {
+          "match": "\\*\\*[^*]+\\*\\*",
+          "name": "markup.bold.kiosune"
+        },
+        {
+          "match": "(?<!\\*)\\*[^*]+\\*(?!\\*)",
+          "name": "markup.italic.kiosune"
+        },
+        {
+          "match": "(\\{)(color)(=)(#[0-9a-fA-F]{3,8})(\\})",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.template-expression.begin.kiosune"
+            },
+            "2": {
+              "name": "support.function.markup.kiosune"
+            },
+            "3": {
+              "name": "keyword.operator.kiosune"
+            },
+            "4": {
+              "name": "constant.other.color.kiosune"
+            },
+            "5": {
+              "name": "punctuation.definition.template-expression.end.kiosune"
+            }
+          }
+        },
+        {
+          "match": "\\{/color\\}",
+          "name": "support.function.markup.kiosune"
+        },
+        {
+          "match": "(\\{)(pause|speed)(=)([^}]*)(\\})",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.template-expression.begin.kiosune"
+            },
+            "2": {
+              "name": "support.function.markup.kiosune"
+            },
+            "3": {
+              "name": "keyword.operator.kiosune"
+            },
+            "4": {
+              "name": "constant.numeric.kiosune"
+            },
+            "5": {
+              "name": "punctuation.definition.template-expression.end.kiosune"
+            }
+          }
+        },
+        {
+          "match": "(\\{)(var)(=)([^}]*)(\\})",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.template-expression.begin.kiosune"
+            },
+            "2": {
+              "name": "support.function.markup.kiosune"
+            },
+            "3": {
+              "name": "keyword.operator.kiosune"
+            },
+            "4": {
+              "name": "variable.other.kiosune"
+            },
+            "5": {
+              "name": "punctuation.definition.template-expression.end.kiosune"
+            }
+          }
+        },
+        {
+          "match": "\\\\n",
+          "name": "constant.character.escape.kiosune"
+        }
+      ]
+    },
+    "placeholder": {
+      "match": "_{3,}",
+      "name": "constant.character.escape.placeholder.kiosune"
+    },
+    "string": {
+      "match": "\"[^\"]*\"",
+      "name": "string.quoted.double.kiosune"
+    },
+    "color": {
+      "match": "#[0-9a-fA-F]{3,8}\\b",
+      "name": "constant.other.color.kiosune"
+    },
+    "number": {
+      "match": "\\b-?[0-9]+(?:\\.[0-9]+)?\\b",
+      "name": "constant.numeric.kiosune"
+    },
+    "comment-trailing": {
+      "match": "(?<=\\s)#.*$",
+      "name": "comment.line.number-sign.kiosune"
+    },
+    "transition": {
+      "match": "^\\s*(@)(transition)(?:[ \\t]+([A-Za-z]+))?(?:[ \\t]+([0-9]+))?(?:[ \\t]+(#[0-9a-fA-F]{3,8}))?(?:[ \\t]+([A-Za-z]+))?[ \\t]*$",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.keyword.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.stage.kiosune"
+        },
+        "3": {
+          "name": "support.function.transition.kiosune"
+        },
+        "4": {
+          "name": "constant.numeric.kiosune"
+        },
+        "5": {
+          "name": "constant.other.color.kiosune"
+        },
+        "6": {
+          "name": "keyword.other.kiosune"
+        }
+      }
+    },
+    "stop": {
+      "match": "^\\s*(@)(stop)(?:[ \\t]+(music|ambience|sfx|voice))?(?:[ \\t]+([0-9]+))?[ \\t]*$",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.keyword.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.flow.kiosune"
+        },
+        "3": {
+          "name": "keyword.other.kiosune"
+        },
+        "4": {
+          "name": "constant.numeric.kiosune"
+        }
+      }
+    },
+    "fx": {
+      "begin": "^\\s*(@)(fx)(?:[ \\t]+(show|move|hide|clear))?",
+      "end": "$",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.keyword.kiosune"
+        },
+        "2": {
+          "name": "keyword.control.effects.kiosune"
+        },
+        "3": {
+          "name": "keyword.other.kiosune"
+        }
+      },
+      "patterns": [
+        {
+          "match": "\\b(as|at|size|layer|z|region|keep|over|linear|to|enter|exit)\\b",
+          "name": "keyword.other.kiosune"
+        },
+        {
+          "match": "\\b(behind_bg|behind_sprites|above_sprites|above_grade|above_ui|rect|full|circle)\\b",
+          "name": "constant.language.kiosune"
+        },
+        {
+          "match": "\\b([a-z_][\\w-]*)(=)",
+          "captures": {
+            "1": {
+              "name": "variable.parameter.kiosune"
+            },
+            "2": {
+              "name": "keyword.operator.kiosune"
+            }
+          }
+        },
+        {
+          "include": "#number"
+        },
+        {
+          "include": "#color"
+        },
+        {
+          "match": "[A-Za-z_][\\w-]*",
+          "name": "support.constant.effect.kiosune"
+        }
+      ]
+    },
+    "sigil": {
+      "match": "(\\$)([A-Za-z_][\\w.]*)",
+      "captures": {
+        "1": {
+          "name": "punctuation.definition.variable.kiosune"
+        },
+        "2": {
+          "name": "variable.other.kiosune"
+        }
+      }
+    }
+  }
+}

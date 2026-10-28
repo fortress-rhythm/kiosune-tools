@@ -1,0 +1,26 @@
+# every construct this corpus shares, used correctly
+#   Cast         Laila
+#   Variables    trust number 0..100 · late flag
+@scene Library · now | fade 900
+@set trust = 30
+@label hub
+@router
+- trust >= 50 -> warm
+- else -> cool
+
+@label warm
+Laila (neutral): She looks up.
+@jump choose
+
+@label cool
+@when late
+Laila (neutral): The lights are already off in the stacks.
+Laila (neutral): She does not look up.
+
+@label choose
+? What now  [mark]
+- Say nothing -> ending [set late = yes]
+- Ask her -> ending
+
+@label ending
+@end Done [key done]

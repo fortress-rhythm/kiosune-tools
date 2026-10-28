@@ -1,0 +1,114 @@
+{
+  "rules": [
+    "adv-argument",
+    "choice-all-conditional",
+    "choice-empty",
+    "choice-interrupted",
+    "directive-comment",
+    "duplicate-label",
+    "falls-off-end",
+    "generated-label-gate",
+    "guard-chain",
+    "guard-orphan",
+    "markup-malformed",
+    "motion-unknown",
+    "place-unknown",
+    "plate-order",
+    "return-without-call",
+    "target-unresolved",
+    "timer-index",
+    "unprefixed-colon",
+    "unreachable",
+    "variable-never-read",
+    "variable-never-written"
+  ],
+  "fixtures": {
+    "adv-argument.kio.txt": [
+      "adv-argument"
+    ],
+    "choice-all-conditional.kio.txt": [
+      "choice-all-conditional"
+    ],
+    "choice-blank-line.kio.txt": [
+      "choice-interrupted"
+    ],
+    "choice-comment.kio.txt": [
+      "choice-interrupted"
+    ],
+    "choice-empty.kio.txt": [
+      "choice-empty"
+    ],
+    "clean-stage.kio.txt": [],
+    "clean.kio.txt": [],
+    "condition-not-group.kio.txt": [],
+    "directive-comment.kio.txt": [
+      "directive-comment"
+    ],
+    "duplicate-label.kio.txt": [
+      "duplicate-label"
+    ],
+    "end-then.kio.txt": [],
+    "falls-off-end.kio.txt": [
+      "falls-off-end"
+    ],
+    "guard-chain.kio.txt": [
+      "guard-chain"
+    ],
+    "guard-orphan.kio.txt": [
+      "guard-orphan",
+      "variable-never-written"
+    ],
+    "import-rows.kio.txt": [],
+    "markup-malformed.kio.txt": [
+      "markup-malformed"
+    ],
+    "motion-unknown.kio.txt": [
+      "motion-unknown"
+    ],
+    "place-unknown.kio.txt": [
+      "place-unknown"
+    ],
+    "plate-order.kio.txt": [
+      "plate-order"
+    ],
+    "plate-reference.kio.txt": [],
+    "random-inline.kio.txt": [],
+    "return-fallthrough.kio.txt": [
+      "return-without-call"
+    ],
+    "return-jumped.kio.txt": [
+      "return-without-call"
+    ],
+    "seen-generated.kio.txt": [
+      "generated-label-gate"
+    ],
+    "stop-audio.kio.txt": [],
+    "subroutine.kio.txt": [],
+    "target-empty-tags.kio.txt": [
+      "target-unresolved"
+    ],
+    "target-missing.kio.txt": [
+      "target-unresolved",
+      "unreachable"
+    ],
+    "timer-out-of-range.kio.txt": [
+      "timer-index"
+    ],
+    "timer-shifted.kio.txt": [
+      "timer-index"
+    ],
+    "unprefixed-colon.kio.txt": [
+      "unprefixed-colon"
+    ],
+    "unreachable.kio.txt": [
+      "unreachable"
+    ],
+    "variable-named-like-a-label.kio.txt": [],
+    "variable-read-only.kio.txt": [
+      "variable-never-written"
+    ],
+    "variable-write-only.kio.txt": [
+      "variable-never-read"
+    ]
+  }
+}

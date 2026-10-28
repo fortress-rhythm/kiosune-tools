@@ -1,0 +1,13 @@
+# A converted script's plate: the plate comes before the expression (the order the studio takes),
+# and {var=...} holds a placeholder that the References row maps to its variable.
+#
+# CREATE IN THE PROJECT BEFORE IMPORTING
+#   Cast        Anna
+#   Variables   anna_plate text
+#   References  REF_ANNA_PLATE = anna_plate
+@set anna_plate = "Anders"
+
+@label k1
+Anna as "{var=REF_ANNA_PLATE}" (determined): Hello.
+Anna as "Anna" (sad): Goodbye.
+@end Done

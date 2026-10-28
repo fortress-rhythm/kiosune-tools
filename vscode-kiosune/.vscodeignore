@@ -1,0 +1,6 @@
+.vscode/**
+test/**
+jsconfig.json
+**/*.map
+.gitignore
+package-lock.json

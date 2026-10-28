@@ -1,0 +1,5 @@
+# flash is a transition, not an entrance
+@scene Library · now | fade 900
+@show Laila at left enter flash 200
+Laila (neutral): Here.
+@end Done

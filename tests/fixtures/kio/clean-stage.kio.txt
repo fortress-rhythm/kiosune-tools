@@ -1,0 +1,13 @@
+# stage, markup and colour lines that only look like the mistakes above
+@scene Library · now | fade 900
+@overlay #ff6fb522
+@show Laila at 120,266 as neutral enter fade 300
+@transition fade 400 #000000
+@caption Room #4
+@nvl clear
+Laila (neutral): {pause=300}The {color=#ff6fb5}pink{/color} card. {speed=2}Slowly.
+@adv
+@move Laila to farright glide 300
+@flash #ffffff 200
+@hide Laila exit slideleft 200
+@end Done [color #3a3a44]

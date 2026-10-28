@@ -1,0 +1,7 @@
+# Empty [] groups after an option must not hide its target from the check.
+@label a
+? Pick
+- Go -> nowhere [] []
+- Stay -> b
+@label b
+@end Done [key done]

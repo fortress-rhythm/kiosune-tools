@@ -1,0 +1,4 @@
+# a pause tag without its =
+@scene Library · now | fade 900
+Laila (neutral): Mine? {pause 100} I don't know.
+@end Done

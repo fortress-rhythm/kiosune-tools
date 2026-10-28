@@ -1,0 +1,7 @@
+# A variable and a label may share a name; the read still has to count.
+# The arrow splits them: what is left of `->` is state, what is right is a target.
+@set trust = 1
+@if trust >= 1 -> trust
+
+@label trust
+@end Done [key done]

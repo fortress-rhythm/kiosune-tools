@@ -1,0 +1,5 @@
+# places are lowercase keywords
+@scene Library · now | fade 900
+@show Laila at Right
+Laila (neutral): Here.
+@end Done

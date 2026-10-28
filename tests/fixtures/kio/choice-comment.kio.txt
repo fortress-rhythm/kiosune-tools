@@ -1,0 +1,6 @@
+? Which one
+# BEAT: she weighs it
+- Stay -> ending
+- Go -> ending
+@label ending
+@end Done [key done]

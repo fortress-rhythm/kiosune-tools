@@ -1,0 +1,6 @@
+? Which one
+
+- Stay -> ending
+- Go -> ending
+@label ending
+@end Done [key done]
