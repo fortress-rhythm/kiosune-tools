@@ -23,7 +23,7 @@ else.
 
 ## Install
 
-Search for **Kiosune Script** in the Extensions view (VS Code Marketplace, or Open VSX for
+Search for **Kiosune Script (unofficial)** in the Extensions view (VS Code Marketplace, or Open VSX for
 VSCodium and Cursor). Or install a `.vsix` from the
 [releases](https://github.com/fortress-rhythm/kiosune-tools/releases): Extensions view → `···` →
 *Install from VSIX…*.

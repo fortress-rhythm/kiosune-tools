@@ -1,6 +1,6 @@
 {
   "name": "kiosune",
-  "displayName": "Kiosune Script",
+  "displayName": "Kiosune Script (unofficial)",
   "description": "Unofficial support for Kiosune Studio scripts: highlighting, variables, flow checks and a scene map.",
   "version": "0.1.0",
   "publisher": "fortress-rhythm",

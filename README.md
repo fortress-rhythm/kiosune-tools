@@ -16,7 +16,7 @@ official [cheat sheet](https://kiosune.com/tutorials/script-cheat-sheet).*
 
 ## The extension
 
-Install **Kiosune Script** from the VS Code Marketplace or Open VSX, or a `.vsix` from the
+Install **Kiosune Script (unofficial)** from the VS Code Marketplace or Open VSX, or a `.vsix` from the
 releases. See [its README](vscode-kiosune/README.md) for everything it does.
 
 ## The command-line tools
